@@ -5,9 +5,10 @@ import os
 
 
 class GameScreenApp:
-    def __init__(self, window, category):
+    def __init__(self, window, category, difficulty):
         self.window = window
         self.category = category
+        self.difficulty = difficulty
         self.tries = 5
         self.entry_boxes = []
         self.y_position = 20
@@ -81,8 +82,24 @@ class GameScreenApp:
 
         word_bank = [line.rstrip("\n") for line in lines]
         self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
-    
 
+        
+        #Pick a word that has the parameters of the selected difficulty
+        if self.difficulty == "Easy":
+            print('test 1 test')
+            while len(self.chosen_word) > 5:
+                print("test 1")
+                self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
+        elif self.difficulty == "Medium":
+            while len(self.chosen_word) < 6 or len(self.chosen_word) > 9:
+                print("test 2")
+                self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
+        else:
+            while len(self.chosen_word) < 9:
+                print("test 3")
+                self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
+
+        print("The chosen word's length -> {}".format(len(self.chosen_word)))
     def render_new_input(self):
         """
         This function will render a row of entry boxes where the user can submit their guess
@@ -96,6 +113,8 @@ class GameScreenApp:
 
             new_entry.bind("<KeyRelease>", self.limit_number_chars)
             new_entry.bind("<FocusIn>", self.on_focus_in)
+            new_entry.bind("<Left>", self.shift_focus_left)
+            new_entry.bind("<Right>", self.shift_focus_right)
 
             self.entry_boxes.append(new_entry)
             x_position += 50
@@ -138,7 +157,8 @@ class GameScreenApp:
 
             if new_guess == self.chosen_word: 
                 messagebox.showinfo("CONGRATS!", "YOU GOT IT RIGHT!")
-                self.return_to_title_screen()
+                self.game_frame.place_forget()
+                GameScreenApp(self.window, self.category, self.difficulty)
             else:
                 if self.tries > 1:
                     self.tries-=1
@@ -147,7 +167,7 @@ class GameScreenApp:
                     self.render_new_input()
                 else: 
                     messagebox.showwarning("You lost!", "You spent all tries! :( \n The answer was -> {}".format(self.chosen_word))
-                    self.go_back()
+                    self.return_to_title_screen()
         else:
             messagebox.showinfo("Info","You need to fill all blank spaces!")
 
@@ -188,24 +208,52 @@ class GameScreenApp:
             
         #------
 
-        self.shift_entry_focus()
+        #Once the user writes in a Entry box, the focus shifts to the next one automatically
+        if len(self.entry_widget.get()) >= 1 and self.entry_current_index < len(self.entry_boxes) - 1:
+            next_entry_box = self.entry_boxes[self.entry_current_index + 1]
+            next_entry_box.focus_set()
+
         
+
     def on_focus_in(self, event):
         """
         This function tracks the current focused entry so the "shift_entry_focus" method can work
         """
         self.entry_widget = event.widget
-        self.entry_current_index = self.entry_boxes.index(self.entry_widget)
+        if self.entry_widget in self.entry_boxes:
+            self.entry_current_index = self.entry_boxes.index(self.entry_widget)
+        else:
+            self.entry_current_index = -1 
         
-    def shift_entry_focus(self):
+
+    def shift_focus_right(self, event):
         """
-        This function will detect which entry box is "focused" and shift onto
-        the next one once the user types the letter in a entry box
+        This function will move the Entry focus to the entry on the right of the previous Entry
         """
-        if self.entry_widget is not None and len(self.entry_widget.get()) >= 1 and self.entry_current_index < len(self.entry_boxes) - 1:
+        self.entry_widget = event.widget
+        self.entry_current_index = self.entry_boxes.index(self.entry_widget)
+
+        if len(self.entry_widget.get()) >= 0 and self.entry_current_index < len(self.entry_boxes) - 1:
             next_entry_box = self.entry_boxes[self.entry_current_index + 1]
             next_entry_box.focus_set()
+        else:
+            next_entry_box = self.entry_boxes[0]
+            next_entry_box.focus_set()
+        
 
+    def shift_focus_left(self, event):
+        """
+        This function will move the Entry focus to the entry on the left of the previous Entry
+        """
+        self.entry_widget = event.widget
+        self.entry_current_index = self.entry_boxes.index(self.entry_widget)
+
+        if self.entry_current_index > 0:
+            previous_entry_box = self.entry_boxes[self.entry_current_index - 1]
+            previous_entry_box.focus_set()
+        else:
+            previous_entry_box = self.entry_boxes[len(self.entry_boxes) - 1]
+            previous_entry_box.focus_set()
 
     def calculate_center_frame(self):
         """
@@ -231,5 +279,5 @@ class GameScreenApp:
         self.game_frame.place_forget()
 
         from title_screen import TitleScreenApp
-        TitleScreenApp(self.window)
+        TitleScreenApp(self.window, self.difficulty)
 

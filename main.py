@@ -38,6 +38,6 @@ if __name__ == "__main__":
     window.resizable(False, False)
 
     #Initialize the title screen
-    app = TitleScreenApp(window)
+    app = TitleScreenApp(window, "Medium")
 
     window.mainloop()
