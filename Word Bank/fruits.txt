@@ -17,3 +17,14 @@ Lemon
 Lime
 Peach
 Grapefruit
+Apricot
+Cantaloupe
+Fig
+Lychee
+Tangerine
+Coconut
+Plum
+Pomegranate
+Honeydew
+Starfruit
+Nectarine

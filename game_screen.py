@@ -12,6 +12,7 @@ class GameScreenApp:
         self.tries = 5
         self.entry_boxes = []
         self.y_position = 20
+        self.popup = None
 
         self.select_word()
         self.setup_game_screen()
@@ -48,6 +49,7 @@ class GameScreenApp:
         self.submit_answer = Button(self.game_frame, text = "Submit", width=10, height=2, font=("Halvetica", 18), command=lambda:(self.check_answer()))
         self.submit_answer.place(x = 420, y = 480)
 
+        self.window.bind("<Return>", lambda event: self.check_answer())
         self.render_new_input()
         print("The chosen word was -> {}".format(self.chosen_word))
 
@@ -68,8 +70,8 @@ class GameScreenApp:
             file_name = "animals.txt" 
         elif self.category == "Fruits":
             file_name = "fruits.txt"
-        elif self.category == "Countries":
-            file_name = "countries.txt"
+        elif self.category == "Colors":
+            file_name = "colors.txt"
         elif self.category == "Jobs":
             file_name = "jobs.txt"
 
@@ -157,8 +159,7 @@ class GameScreenApp:
 
             if new_guess == self.chosen_word: 
                 messagebox.showinfo("CONGRATS!", "YOU GOT IT RIGHT!")
-                self.game_frame.place_forget()
-                GameScreenApp(self.window, self.category, self.difficulty)
+                self.play_again()
             else:
                 if self.tries > 1:
                     self.tries-=1
@@ -166,8 +167,8 @@ class GameScreenApp:
                     self.y_position += 60
                     self.render_new_input()
                 else: 
-                    messagebox.showwarning("You lost!", "You spent all tries! :( \n The answer was -> {}".format(self.chosen_word))
-                    self.return_to_title_screen()
+                    self.losing_popup()
+                    
         else:
             messagebox.showinfo("Info","You need to fill all blank spaces!")
 
@@ -190,9 +191,7 @@ class GameScreenApp:
     
     def limit_number_chars(self, event):
         """
-        This function has two functionalities:
-        -> Prevents the user from typing more than 1 char in a Entry box
-        -> Automatically capitalizes every char typed in the Entry box
+        This function prevents the user from typing more than 1 char in a Entry box
 
         """
         entry = event.widget
@@ -206,12 +205,6 @@ class GameScreenApp:
         if (n_chars > 1):
             entry.delete(1, END)
             
-        #------
-
-        #Once the user writes in a Entry box, the focus shifts to the next one automatically
-        if len(self.entry_widget.get()) >= 1 and self.entry_current_index < len(self.entry_boxes) - 1:
-            next_entry_box = self.entry_boxes[self.entry_current_index + 1]
-            next_entry_box.focus_set()
 
         
 
@@ -255,6 +248,7 @@ class GameScreenApp:
             previous_entry_box = self.entry_boxes[len(self.entry_boxes) - 1]
             previous_entry_box.focus_set()
 
+
     def calculate_center_frame(self):
         """
         This function center the "game_frame" Frame vertically 
@@ -276,8 +270,49 @@ class GameScreenApp:
 
 
     def return_to_title_screen(self):
+        if self.popup is not None:
+            self.popup.destroy()
+
         self.game_frame.place_forget()
 
         from title_screen import TitleScreenApp
         TitleScreenApp(self.window, self.difficulty)
 
+
+    def play_again(self):
+        """
+        Keep playing the same category with a different word.
+        """
+        if self.popup is not None:
+            self.popup.destroy()
+
+        self.game_frame.place_forget()
+        GameScreenApp(self.window, self.category, self.difficulty)
+
+    def losing_popup(self):
+        """
+        This function will display a "popup" showing the user that they spent
+        all tries as well as the correct answer
+        It also gives the user the possibility to go back to the title screen
+        or keep playing!
+        """
+        self.popup = Toplevel()
+        self.popup.title("You lost! :(")
+        self.popup.geometry("500x300")
+        self.popup.resizable(False, False)
+        self.popup.config(background="lightgrey")
+        from main import AppConfig
+        AppConfig.center_window(self.popup, 500, 300)
+
+        losing_message_lbl = Label(self.popup, text="You lost! :(", font = ("Arial", 18), bg="lightgrey")
+        losing_message_lbl.place(x = 190, y = 20)
+
+        correct_answer_lbl = Label(self.popup, text="The correct answer was -> {}".format(self.chosen_word), font=("Arial", 14), bg="lightgrey")
+        correct_answer_lbl.place(x = 90, y = 80)
+
+        go_back_btn = Button(self.popup, text = "Return to \n Title Screen!",width= 12, height=3, font=("Arial", 12), command=lambda:self.return_to_title_screen())
+        go_back_btn.place(x = 100, y = 150)
+
+        play_again_btn = Button(self.popup, text="Play again!",width= 12, height=3, font=("Arial", 12), command=lambda:self.play_again())
+        play_again_btn.place(x = 300, y = 150)
+        

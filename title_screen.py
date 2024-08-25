@@ -24,7 +24,7 @@ class TitleScreenApp:
 
         self.animal_btn = Button(self.category_frame, text = "Animals", width=10, height=1, border=0, bg="grey", font=("Helvetica", 12), command= lambda:self.start_game("Animals"))
         self.jobs_btn = Button(self.category_frame, text = "Jobs", width=10, height=1, bg="grey",border=0, font=("Helvetica", 12), command= lambda:self.start_game("Jobs"))
-        self.countries_btn = Button(self.category_frame, text = "Countries", width=10, height=1,border=0, bg="grey", font=("Helvetica", 12), command= lambda:self.start_game("Countries"))
+        self.countries_btn = Button(self.category_frame, text = "Colors", width=10, height=1,border=0, bg="grey", font=("Helvetica", 12), command= lambda:self.start_game("Colors"))
         self.fruits_btn = Button(self.category_frame, text = "Fruits", width=10, height=1, bg="grey",border=0, font=("Helvetica", 12), command= lambda:self.start_game("Fruits"))
         
         self.animal_btn.grid(row = 0, column= 0, padx=100, pady=50)

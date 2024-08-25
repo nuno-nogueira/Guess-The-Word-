@@ -19,3 +19,13 @@ Oyster
 Seahorse
 Armadillo
 Ostrich
+Zebra
+Kangoroo
+Koala
+Wolf
+Buffalo
+Seal
+Otter
+Dolphin
+Jellyfish
+Crab
