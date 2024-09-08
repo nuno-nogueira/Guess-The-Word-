@@ -10,7 +10,7 @@ Pharmacist
 Veterinarian
 Pilot
 Chef
-Cook
+Cook;guessed
 Waiter
 Bartender
 Mechanic
@@ -18,7 +18,7 @@ Electrician
 Plumber
 Carpenter
 Welder
-Mason
+Mason;guessed
 Bricklayer
 Painter
 Tailor

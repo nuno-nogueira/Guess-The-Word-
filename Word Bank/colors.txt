@@ -18,9 +18,7 @@ Beige
 Maroon
 Lavender
 Turquoise
-Coral
 Amber
-Olive
 Mint
 Peach
 Navy
@@ -28,7 +26,4 @@ Crimson
 Gold
 Silver
 Bronze
-Charcoal
-Sapphire
-Emreald
 Aqua

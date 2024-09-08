@@ -1,5 +1,5 @@
 from tkinter import Tk
-from title_screen import TitleScreenApp
+from welcome_screen import WelcomeScreenApp
 
 class AppConfig:
     window_width = 1000
@@ -37,6 +37,6 @@ if __name__ == "__main__":
     window.resizable(False, False)
 
     #Initialize the title screen
-    app = TitleScreenApp(window, "Medium")
+    app = WelcomeScreenApp(window)
 
     window.mainloop()
