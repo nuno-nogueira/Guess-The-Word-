@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 import os
 import random
-
+    
 class Game:
     def __init__(self, window, difficulty, category):
         self.window = window
@@ -20,7 +20,7 @@ class Game:
         self.select_word()
 
     #-------> Game Widgets!
-    def game_screen_setup(self):
+    def game_screen_setup(self, chosen_difficulty):
         """
         This function has all the game screen's widgets!
         """
@@ -37,10 +37,11 @@ class Game:
         self.return_btn.place(x = 10, y = 10)
 
         self.category_chosen = Label(self.game_frame, bg="lightgrey", text="{}".format(self.category), font=("Arial", 20))
-        self.category_chosen.place(x = 410, y = 10)
+        self.category_chosen.place(x = self.category_label_x_pos, y = 10)
 
-        self.difficulty_chosen = Label(self.game_frame, bg= self.label_color, text="{}".format(self.difficulty), fg="white", font=("Arial", 20, "bold"))
-        self.difficulty_chosen.place(x = 410, y = 110)
+        self.difficulty_chosen = Label(self.game_frame, bg= self.label_color, text="{}".format(chosen_difficulty), fg="white", font=("Arial", 20, "bold"))
+        self.difficulty_chosen.place(x = self.difficulty_label_x_pos, y = 110)
+
 
         self.user_input = StringVar()
         self.user_input.set("")
@@ -72,12 +73,16 @@ class Game:
         #Check which category the user chose and open the respective word bank
         if self.category == "Animals":
             file_name = "animals.txt" 
+            self.category_label_x_pos = 400
         elif self.category == "Fruits":
             file_name = "fruits.txt"
+            self.category_label_x_pos = 415
         elif self.category == "Colors":
             file_name = "colors.txt"
+            self.category_label_x_pos = 410
         elif self.category == "Jobs":
             file_name = "jobs.txt"
+            self.category_label_x_pos = 420
 
         # Construct the full path to the file
         self.file_path = os.path.join(base_dir, "Word Bank", file_name)
@@ -88,32 +93,61 @@ class Game:
 
         word_bank = [line.rstrip("\n") for line in lines]
 
-        #Already guesses words will not be picked again!
+        #Already guesses words won't be picked again! (Unless the user resets the Word Bank)
         for word in word_bank:
             if ";guessed" in word:
                 word_bank.remove(word)
 
         print(word_bank)
-        self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
         
+        self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
+    
+        chosen_difficulty = self.difficulty
+
+        if chosen_difficulty == "Random":
+            difficulties = ["Easy","Medium","Hard"]
+            chosen_difficulty = difficulties[random.randint(-1, 2)]
+
+        #Check if there are words within the difficulty & category chosen
+        words_available = False
+        for word in word_bank:
+            if chosen_difficulty == "Easy":
+                if len(word) <= 5:
+                    words_available = True
+            elif chosen_difficulty == "Medium":
+                if len(word) >= 6 and len(word) <= 9:
+                    words_available = True
+            elif chosen_difficulty == "Hard":
+                if len(word) >= 10:
+                    words_available = True
+
+        if words_available == False:
+            messagebox.showinfo("All words found!","All words were found for the {} difficulty in the {} category!\n Try to choose a different category and/or difficulty!" .format(chosen_difficulty, self.category))
+            from game_settings_screen import ClassicModeSettings
+            ClassicModeSettings(self.window, self.difficulty, self.category)
+            return
+
         #Pick a word that has the parameters of the selected difficulty
-        if self.difficulty == "Easy":
+        if chosen_difficulty == "Easy":
             self.label_color = "#84f069"
+            self.difficulty_label_x_pos = 420
             while len(self.chosen_word) > 5:
                 self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
-                
-        elif self.difficulty == "Medium":
+                print(self.chosen_word)
+        elif chosen_difficulty == "Medium":
             self.label_color = "#e0e342"
+            self.difficulty_label_x_pos = 400
             while len(self.chosen_word) < 6 or len(self.chosen_word) > 9:
                 self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
-        else:
+        elif chosen_difficulty == "Hard":
             self.label_color = "#de1c07"
-            while len(self.chosen_word) < 9:
+            self.difficulty_label_x_pos = 420
+            while len(self.chosen_word) < 10:
                 self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
-        
+
         print("The chosen word's length -> {}".format(len(self.chosen_word)))
         print("The chosen word is -> {}".format(self.chosen_word))
-        self.game_screen_setup()
+        self.game_screen_setup(chosen_difficulty)
 
 
     def render_new_input(self):
@@ -205,6 +239,7 @@ class Game:
         """
         word_length = len(self.chosen_word)
         match word_length:
+            case 2: self.x_position = 390
             case 3: self.x_position = 370
             case 4: self.x_position = 350
             case 5: self.x_position = 330
@@ -218,6 +253,9 @@ class Game:
             case 13: self.x_position = 140
             case 14: self.x_position = 120
             case 15: self.x_position = 100
+            case 16: self.x_position = 80
+            case 17: self.x_position = 60
+            case 18: self.x_position = 40
     
 
     #----> Check user's answer
@@ -250,8 +288,14 @@ class Game:
                     n_spaces += 1
                     self.x_position += 50
                 if letter in self.chosen_word and letter != self.chosen_word[i + n_spaces]:
-                    #The letter is in the word, but in the wrong position
-                    self.render_result("yellow", letter)
+                    #If the letter is correct and the position where that letter is supposed to be already has that letter
+                    for j in range (len(self.chosen_word)):
+                        if new_guess[j] == new_guess[i] and new_guess[j] == self.chosen_word[j + n_spaces]:
+                            self.render_result("lightgrey", letter)
+                            break
+                        if j == (len(self.chosen_word) - 1):
+                            #The letter is in the word, but in the wrong position
+                            self.render_result("yellow", letter)
                 elif letter == self.chosen_word[i + n_spaces]:
                     #The letter is in the word as well as in the correct position
                     self.render_result("green", letter)
@@ -325,7 +369,7 @@ class Game:
         self.game_frame.place_forget()
 
         from game_settings_screen import ClassicModeSettings
-        ClassicModeSettings(self.window)
+        ClassicModeSettings(self.window, self.difficulty, self.category)
 
 
     def play_again(self):

@@ -65,7 +65,7 @@ class GamemodeScreenApp:
         self.classic_mode_frame.place_forget()
         self.flag_mode_frame.place_forget()
 
-        ClassicModeSettings(self.window)
+        ClassicModeSettings(self.window, "", "")
 
 
     def flag_mode(self):

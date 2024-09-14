@@ -4,34 +4,30 @@ Teacher
 Engineer
 Architect
 Lawyer
-Accountant
+Police Officer
+Firefighter
+Programmer
+Photographor
+Bioligist
+Chemist
 Dentist
-Pharmacist
-Veterinarian
-Pilot
-Chef
-Cook;guessed
-Waiter
-Bartender
-Mechanic
-Electrician
+Entrepreneur
 Plumber
 Carpenter
-Welder
-Mason;guessed
-Bricklayer
-Painter
-Tailor
-Hairdresser
-Barber
-Photographer
-Journalist
-Writer
-Author
-Editor
-Translator
-Interpreter
-Librarian
-Scientist
-Chemist
-Biologist
+Mechanic
+Director
+Bartender
+Housekeeper
+Flight Attendant
+Farmer
+Graphic Designer
+Music Producer
+Social Worker
+Chef
+Event Planner
+DJ
+Truck Driver
+Animator
+Waiter
+Pilot
+Actor

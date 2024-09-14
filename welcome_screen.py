@@ -155,8 +155,16 @@ class WelcomeScreenApp:
 
         #-------> Instruction 4
         self.step4_lbl = Label(self.instructions_window, text="4.", font=("Arial", 24), bg = "lightgrey")
-        self.step4_lbl.place(x = 50, y = 300)
+        self.step4_lbl.place(x = 10, y = 350)
 
         self.instruction4_lbl = Label(self.instructions_window, text="Try to guess ALL the words in the game \n HAVE FUN! :-)",
         font=("Arial",14), bg="lightgrey")
         self.instruction4_lbl.place(x = 50, y = 530)
+
+        img4_path = os.path.join("images","instruction4_img.png")
+        img4 = Image.open(img4_path)
+        img4 = img4.resize((470, 120))
+        open_new_img = ImageTk.PhotoImage(img4)
+        self.instruction4_img = Label(self.instructions_window, image=open_new_img, bg="lightgrey")
+        self.instruction4_img.image = open_new_img
+        self.instruction4_img.place(x = 10, y = 400)
