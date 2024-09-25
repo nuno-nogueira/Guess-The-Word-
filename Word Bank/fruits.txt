@@ -4,8 +4,7 @@ Orange
 Mango
 Grape
 Pineapple
-Strawberry
-Blueberry
+StrawberryBlueberry
 Raspberry
 Blackberry
 Cherry
@@ -28,3 +27,4 @@ Pomegranate
 Honeydew
 Starfruit
 Nectarine
+Challenge complete? No

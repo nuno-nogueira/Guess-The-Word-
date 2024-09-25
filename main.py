@@ -9,7 +9,7 @@ class AppConfig:
 
     def center_window(window, width, height):
         """
-        This function will center the window bsaed on 
+        This function will center the window based on 
         the screen's width and height! 
         """
 

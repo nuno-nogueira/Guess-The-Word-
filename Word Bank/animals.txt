@@ -9,8 +9,7 @@ Lion
 Eagle
 Tiger
 Shark
-Deer
-Fox
+DeerFox
 Squirrel
 Rabbit
 Flamingo
@@ -29,3 +28,10 @@ Otter
 Dolphin
 Jellyfish
 Crab
+Chimpazee
+Hippopotamus
+Salamander
+Grasshoper
+Woodpecker
+Caterpillar
+Challenge complete? No

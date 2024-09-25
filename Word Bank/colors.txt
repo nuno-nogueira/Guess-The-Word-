@@ -26,4 +26,11 @@ Crimson
 Gold
 Silver
 Bronze
-Aqua
+Aquamarine
+Periwinkle
+Yellowgreen
+Ultramarine
+Olive drab
+Slate Gray
+Dark magenta
+Challenge complete? No

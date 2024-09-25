@@ -7,7 +7,7 @@ Lawyer
 Police Officer
 Firefighter
 Programmer
-Photographor
+Photographer
 Bioligist
 Chemist
 Dentist
@@ -24,10 +24,10 @@ Graphic Designer
 Music Producer
 Social Worker
 Chef
-Event Planner
-DJ
+Event PlannerDJ
 Truck Driver
 Animator
 Waiter
 Pilot
 Actor
+Challenge complete? No

@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 import os
+from PIL import Image, ImageTk
 import random
     
 class Game:
@@ -16,15 +17,25 @@ class Game:
         self.input_area = ""
         self.chosen_word = ""
         self.label_color = ""
-
+        #---> Challenge-related variables
+        self.challenge_words = [] #--> To store all chosen words for the challenge
+        self.word_counter = 1 #--> To count the amount of words the user guessed
+        #Timer variables
+        self.minutes_timer = 5
+        self.seconds_timer = 1
+    
+        self.save_user_info()
         self.select_word()
 
-    #-------> Game Widgets!
-    def game_screen_setup(self, chosen_difficulty):
+    #-------> Game Screen Widgets!
+    def game_screen_setup(self, chosen_difficulty, minutes_timer, seconds_timer):
         """
         This function has all the game screen's widgets!
         """
         
+        self.minutes_timer = minutes_timer
+        self.seconds_timer = seconds_timer
+
         self.game_frame = Frame(self.window, width=900, height=680, bg="lightgrey")
         self.game_frame.place(x = 50, y = 10)
 
@@ -33,14 +44,11 @@ class Game:
         self.show_tries = Label(self.game_frame, bg="lightgrey", textvariable=self.show_tries_text, font=("Arial", 22))
         self.show_tries.place(x = 360, y = 50)
 
-        self.return_btn = Button(self.game_frame, text="Return", width=10, height=2, font=("Halvetica", 12), command=lambda: (self.return_to_title_screen()))
-        self.return_btn.place(x = 10, y = 10)
-
         self.category_chosen = Label(self.game_frame, bg="lightgrey", text="{}".format(self.category), font=("Arial", 20))
         self.category_chosen.place(x = self.category_label_x_pos, y = 10)
 
         self.difficulty_chosen = Label(self.game_frame, bg= self.label_color, text="{}".format(chosen_difficulty), fg="white", font=("Arial", 20, "bold"))
-        self.difficulty_chosen.place(x = self.difficulty_label_x_pos, y = 110)
+        self.difficulty_chosen.place(x = self.difficulty_label_x_pos, y = 90)
 
 
         self.user_input = StringVar()
@@ -51,9 +59,23 @@ class Game:
         self.input_area = Frame(self.game_frame, width = 1000, height=500, bg="lightgrey")
         self.input_area.place(x = 0, y = 150)
 
-        self.submit_answer = Button(self.game_frame, text = "Submit", width=10, height=2, font=("Halvetica", 18), command=lambda:(self.check_answer()))
-        self.submit_answer.place(x = 380, y = 500)
+        self.submit_answer = Button(self.game_frame, text = "Submit", width=10, height=1, font=("Halvetica", 18, "bold"), command=lambda:(self.check_answer()))
+        self.submit_answer.place(x = 375, y = 500)
 
+
+        if self.difficulty == "Challenge":
+            self.timer = Label(self.game_frame, bg="lightgrey", text="{}:{}".format(self.minutes_timer, self.seconds_timer), font=("Arial", 22, "bold"))
+            self.timer.place(x = 420, y = 140)
+            self.set_timer(self.minutes_timer, self.seconds_timer)
+
+        #--> Go back button
+        icon_path = os.path.join("images","go_back_icon.png")
+        icon = Image.open(icon_path)
+        icon = icon.resize((56, 56))
+        open_new_icon = ImageTk.PhotoImage(icon)
+        self.go_back_button = Button(self.game_frame, image=open_new_icon, bg="lightgrey", command=lambda: (self.return_to_title_screen()))
+        self.go_back_button.image = open_new_icon
+        self.go_back_button.place(x = 820, y = 10)
 
         self.window.bind("<Return>", lambda event: self.check_answer())
         self.render_new_input()
@@ -93,13 +115,17 @@ class Game:
 
         word_bank = [line.rstrip("\n") for line in lines]
 
-        #Already guesses words won't be picked again! (Unless the user resets the Word Bank)
-        for word in word_bank:
-            if ";guessed" in word:
-                word_bank.remove(word)
+        # So the "Challenge complete" line is not counted as a word
+        del word_bank[len(word_bank) - 1]
 
-        print(word_bank)
-        
+        #Already guesses words won't be picked again! (Unless the user resets the Word Bank)
+        for i in range(len(word_bank) - 1):
+            if ";guessed" in word_bank[i]:
+                if self.difficulty == "Challenge":
+                        word_bank[i] = word_bank[i][:-8]
+                else:
+                    word_bank.remove(word_bank[i])
+
         self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
     
         chosen_difficulty = self.difficulty
@@ -109,23 +135,24 @@ class Game:
             chosen_difficulty = difficulties[random.randint(-1, 2)]
 
         #Check if there are words within the difficulty & category chosen
-        words_available = False
-        for word in word_bank:
-            if chosen_difficulty == "Easy":
-                if len(word) <= 5:
-                    words_available = True
-            elif chosen_difficulty == "Medium":
-                if len(word) >= 6 and len(word) <= 9:
-                    words_available = True
-            elif chosen_difficulty == "Hard":
-                if len(word) >= 10:
-                    words_available = True
+        if chosen_difficulty != "Challenge":
+            words_available = False
+            for word in word_bank:
+                if chosen_difficulty == "Easy":
+                    if len(word) <= 5:
+                        words_available = True
+                elif chosen_difficulty == "Medium":
+                    if len(word) >= 6 and len(word) <= 9:
+                        words_available = True
+                elif chosen_difficulty == "Hard":
+                    if len(word) >= 10:
+                        words_available = True
 
-        if words_available == False:
-            messagebox.showinfo("All words found!","All words were found for the {} difficulty in the {} category!\n Try to choose a different category and/or difficulty!" .format(chosen_difficulty, self.category))
-            from game_settings_screen import ClassicModeSettings
-            ClassicModeSettings(self.window, self.difficulty, self.category)
-            return
+            if words_available == False:
+                messagebox.showinfo("All words found!","All words were found for the {} difficulty in the {} category!\n Try to choose a different category and/or difficulty!" .format(chosen_difficulty, self.category))
+                from game_settings_screen import ClassicModeSettings
+                ClassicModeSettings(self.window)
+                return
 
         #Pick a word that has the parameters of the selected difficulty
         if chosen_difficulty == "Easy":
@@ -133,7 +160,6 @@ class Game:
             self.difficulty_label_x_pos = 420
             while len(self.chosen_word) > 5:
                 self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
-                print(self.chosen_word)
         elif chosen_difficulty == "Medium":
             self.label_color = "#e0e342"
             self.difficulty_label_x_pos = 400
@@ -144,10 +170,17 @@ class Game:
             self.difficulty_label_x_pos = 420
             while len(self.chosen_word) < 10:
                 self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
-
-        print("The chosen word's length -> {}".format(len(self.chosen_word)))
-        print("The chosen word is -> {}".format(self.chosen_word))
-        self.game_screen_setup(chosen_difficulty)
+        elif chosen_difficulty == "Challenge":
+            self.label_color = "#751207"
+            self.difficulty_label_x_pos = 380
+            for i in range (5):
+                while len(self.chosen_word) < 10 or self.chosen_word in self.challenge_words:
+                        self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
+                self.challenge_words.append(self.chosen_word)
+                self.chosen_word = self.challenge_words[0]
+        print("The chosen word is -> {}\n".format(self.chosen_word))
+        print("Challenge words -> {}".format(self.challenge_words))
+        self.game_screen_setup(chosen_difficulty, self.minutes_timer, self.seconds_timer)
 
 
     def render_new_input(self):
@@ -173,6 +206,37 @@ class Game:
         self.entry_boxes[0].focus_set()
 
     
+    def set_timer(self, minutes_timer, seconds_timer):
+        self.minutes_timer = minutes_timer
+        self.seconds_timer = seconds_timer
+
+        self.seconds_timer -= 1
+        if self.seconds_timer == 0:
+            if self.minutes_timer == 0:
+                messagebox.showwarning("Game's over","Time's up! :(")
+                self.return_to_title_screen()
+                return
+            self.seconds_timer = 59
+            self.minutes_timer -= 1
+        
+        if self.seconds_timer < 10:
+            self.timer.config(text = "{}:0{}".format(self.minutes_timer, self.seconds_timer))
+        else:
+            self.timer.config(text = "{}:{}".format(self.minutes_timer, self.seconds_timer))
+
+        self.timer_id = self.window.after(1000, lambda: self.set_timer(self.minutes_timer, self.seconds_timer))
+
+
+    def stop_timer(self):
+        """
+        This function will stop the set_timer() function once the user guesses a word
+        If this function wasn't here, there would be for example 2 timers running in the 
+        2nd mysterious word
+        """
+        if self.timer_id:
+            self.window.after_cancel(self.timer_id)
+            self.timer_id = None
+
     #----> Input Functionalities
     def limit_number_chars(self, event):
         """
@@ -181,11 +245,22 @@ class Game:
         """
         entry = event.widget
         current_char = entry.get().upper()
+
+        # Only 1 char per entry box
         entry.delete(0, END)
         entry.insert(0, current_char)
 
-        #------
+        # Get the current index of the entry
+        current_index = self.entry_boxes.index(entry)
 
+        # Check if the pressed key isn't an arrow key so it allows the user to shift focus manually
+        if event.keysym not in ["Left","Right"]:
+            # Automatically moves the focus to the next entry if 1 char is in the entry box
+            if len(current_char) == 1 and current_index < len(self.entry_boxes) - 1:
+                next_entry = self.entry_boxes[current_index + 1]
+                next_entry.focus_set()
+
+        # Delete the extra chars 
         n_chars = len(entry.get())
         if (n_chars > 1):
             entry.delete(1, END)
@@ -193,7 +268,7 @@ class Game:
 
     def on_focus_in(self, event):
         """
-        This function tracks the current focused entry so the "shift_entry_focus" method can work
+        Tracks the current focused entry so the "shift_entry_focus" method can work
         """
         self.entry_widget = event.widget
         if self.entry_widget in self.entry_boxes:
@@ -212,6 +287,7 @@ class Game:
         if len(self.entry_widget.get()) >= 0 and self.entry_current_index < len(self.entry_boxes) - 1:
             next_entry_box = self.entry_boxes[self.entry_current_index + 1]
             next_entry_box.focus_set()
+        #If the focus is on the last entry box, it will cycle back to the 1st entry box
         else:
             next_entry_box = self.entry_boxes[0]
             next_entry_box.focus_set()
@@ -227,6 +303,7 @@ class Game:
         if self.entry_current_index > 0:
             previous_entry_box = self.entry_boxes[self.entry_current_index - 1]
             previous_entry_box.focus_set()
+        #If the focus is on the first entry box, it will cycle back to the last entry box
         else:
             previous_entry_box = self.entry_boxes[len(self.entry_boxes) - 1]
             previous_entry_box.focus_set()
@@ -267,12 +344,13 @@ class Game:
         and which aren't in the secret word at all (grey bg)
         """
         self.calculate_center_frame()
+
         new_guess = ""
         #Sum all the letters wrote to form the guess word!
         for letter in self.entry_boxes:
             new_guess += letter.get()
         
-        secret_word = self.chosen_word.replace(" ","") #Remove a space when there is one so the lengtho of the secret word is not interfered by the space 
+        secret_word = self.chosen_word.replace(" ","") #Remove a space when there is one so the secret word's length isn't interfered by the space 
 
         #Check if the nª of letters of the user's guess and the secret word are the same!
         if len(new_guess) == len(secret_word):
@@ -305,9 +383,26 @@ class Game:
                 self.x_position += 50
 
             if new_guess == secret_word: 
-                messagebox.showinfo("CONGRATS!", "YOU GOT IT RIGHT!")
-                self.update_word_bank()
-                self.play_again()
+                if self.difficulty == "Challenge":
+                    if self.word_counter == 5:
+                        messagebox.showinfo("WOOO","CONGRATS, YOU DID IT! :D")
+                        self.update_word_bank()
+                        self.save_user_info()
+                        self.return_to_title_screen()
+                        return
+                    else:
+                        messagebox.showinfo("Good job!","{} word(s) found! Way to go! :D".format(self.word_counter))
+                        self.word_counter += 1
+                        self.stop_timer()
+                    self.chosen_word = self.challenge_words[self.word_counter - 1]
+                    self.game_frame.place_forget()
+                    self.game_screen_setup(self.difficulty, self.minutes_timer, self.seconds_timer)
+                    self.render_new_input()
+                else:
+                    messagebox.showinfo("CONGRATS!", "YOU GOT IT RIGHT!")
+                    self.update_word_bank()
+                    self.save_user_info()
+                    self.play_again()
             else:
                 if self.tries > 1:
                     self.tries-=1
@@ -347,7 +442,9 @@ class Game:
             lines = f.readlines()
 
         word_bank = [line.rstrip("\n") for line in lines]
-        
+
+        del word_bank[len(word_bank) - 1]
+
         #Iterate the word bank to update the secret word so it doesn't get chosen again
         for i in range(len(word_bank)):
             if word_bank[i].upper() == self.chosen_word:
@@ -356,20 +453,38 @@ class Game:
         
         with open(self.file_path, "w", encoding="utf-8") as f:
             for word in word_bank:
-                if not word_bank[len(word_bank) - 1] == word:
-                    f.write(word + "\n")
-                else:
-                    f.write(word)
+                f.write(word + "\n")
+            if self.word_counter == 5:
+                f.write("Challenge complete? Yes")
+            else:
+                f.write("Challenge complete? No")
+                
 
     
+    def save_user_info(self):
+        """
+        This function will update the user's info (what category & difficulty they chose, and nº of hints they have)
+        in the "user.txt"
+        """
+
+        # Get the absolute path of the directory where the script is located & csonstruct the full path to the file
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        file_path = os.path.join(base_dir, "user.txt")
+
+        with open(file_path, "w", encoding="utf-8") as f:
+            f.write("Category:{}\n" .format(self.category))
+            f.write("Difficulty:{}".format(self.difficulty))
+
+
     def return_to_title_screen(self):
         if self.popup is not None:
             self.popup.destroy()
 
         self.game_frame.place_forget()
 
+        self.save_user_info()
         from game_settings_screen import ClassicModeSettings
-        ClassicModeSettings(self.window, self.difficulty, self.category)
+        ClassicModeSettings(self.window)
 
 
     def play_again(self):

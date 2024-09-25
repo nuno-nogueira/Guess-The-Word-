@@ -22,8 +22,8 @@ class WelcomeScreenApp:
         self.background_img = ImageTk.PhotoImage(resized_bg_image)
         self.background_canvas.create_image(500, 350, anchor=CENTER, image=self.background_img)
         
-        self.welcome_frame = Frame(self.window, width=400, height=1000, bg="lightgrey")
-        self.welcome_frame.place(x = 300, y = 0)
+        self.welcome_frame = Frame(self.window, width=400, height=650, bg="lightgrey")
+        self.welcome_frame.place(x = 300, y = 25)
 
         self.welcome_message = Label(self.window, bg="lightgrey", fg="black", text = "Welcome to \n Guess The Word!", font=("Arial", 26))
         self.welcome_message.pack(pady=100)
