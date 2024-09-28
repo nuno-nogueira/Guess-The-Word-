@@ -5,10 +5,11 @@ from PIL import Image, ImageTk
 import random
     
 class Game:
-    def __init__(self, window, difficulty, category):
+    def __init__(self, window, difficulty, category, gamemode):
         self.window = window
         self.difficulty = difficulty
         self.category = category
+        self.gamemode = gamemode
         self.entry_boxes = []
         self.popup = None
         self.x_position = 0
@@ -24,11 +25,14 @@ class Game:
         self.minutes_timer = 5
         self.seconds_timer = 1
     
-        self.save_user_info()
-        self.select_word()
+        if self.gamemode == "Classic":
+            self.save_user_info()
+            self.select_word()
+        elif self.gamemode == "Flag":
+            self.select_country()
 
     #-------> Game Screen Widgets!
-    def game_screen_setup(self, chosen_difficulty, minutes_timer, seconds_timer):
+    def classic_mode_screen_setup(self, chosen_difficulty, minutes_timer, seconds_timer):
         """
         This function has all the game screen's widgets!
         """
@@ -36,8 +40,8 @@ class Game:
         self.minutes_timer = minutes_timer
         self.seconds_timer = seconds_timer
 
-        self.game_frame = Frame(self.window, width=900, height=680, bg="lightgrey")
-        self.game_frame.place(x = 50, y = 10)
+        self.game_frame = Frame(self.window, width=950, height=680, bg="lightgrey")
+        self.game_frame.place(x = 25, y = 10)
 
         self.show_tries_text = StringVar()
         self.show_tries_text.set("Tries Left -> {}".format(self.tries))
@@ -80,6 +84,60 @@ class Game:
         self.window.bind("<Return>", lambda event: self.check_answer())
         self.render_new_input()
 
+
+    def flag_mode_screen_setup(self):
+        """
+        This function contains all the game screen's widgets for
+        the "Flag Mode"
+        """
+
+        self.game_frame = Frame(self.window, width=950, height=680, bg="lightgrey")
+        self.game_frame.place(x = 25, y = 10)
+
+        self.show_tries_text = StringVar()
+        self.show_tries_text.set("Tries Left -> {}".format(self.tries))
+        self.show_tries = Label(self.game_frame, bg="lightgrey", textvariable=self.show_tries_text, font=("Arial", 22))
+        self.show_tries.place(x = 380, y = 50)
+
+        self.category_chosen = Label(self.game_frame, bg=self.category_label_color, text="{}".format(self.category), font=("Arial", 20, "bold"))
+        self.category_chosen.place(x = self.category_label_x_pos, y = 10)
+
+        flag_path = os.path.join(self.folder_path, self.chosen_country_flag)
+        flag = Image.open(flag_path)
+        flag = flag.resize((130, 90))
+        open_flag = ImageTk.PhotoImage(flag)
+        self.flag_image = Label(self.game_frame, image = open_flag, bg = "lightgrey")
+        self.flag_image.image = open_flag
+        self.flag_image.place(x = 400, y = 110)
+
+        # --> Place the current directory path 4 folders back
+        os.chdir('..\\..')
+        os.chdir('..\\..')
+
+        self.user_input = StringVar()
+        self.user_input.set("")
+        self.user_entry = Entry(self.game_frame, width=20, textvariable=self.user_input, font=("Halvetica", 12))
+        self.user_entry.place(x = 455, y = 500)
+
+        self.input_area = Frame(self.game_frame, width = 1000, height=500, bg="lightgrey")
+        self.input_area.place(x = 0, y = 200)
+
+        self.submit_answer = Button(self.game_frame, text = "Submit", width=10, height=1, font=("Halvetica", 18, "bold"), command=lambda:(self.check_answer()))
+        self.submit_answer.place(x = 410, y = 600)
+
+
+        #--> Go back button
+        icon_path = os.path.join("images","go_back_icon.png")
+        icon = Image.open(icon_path)
+        icon = icon.resize((56, 56))
+        open_new_icon = ImageTk.PhotoImage(icon)
+        self.go_back_button = Button(self.game_frame, image=open_new_icon, bg="lightgrey", command=lambda: (self.return_to_title_screen()))
+        self.go_back_button.image = open_new_icon
+        self.go_back_button.place(x = 850, y = 10)
+
+        self.window.bind("<Return>", lambda event: self.check_answer())
+        self.render_new_input()
+
     #-------> Game Management
     def select_word(self):
         """
@@ -113,18 +171,21 @@ class Game:
         with open(self.file_path, "r", encoding="utf-8") as f:
             lines = f.readlines()
 
-        word_bank = [line.rstrip("\n") for line in lines]
+        word_bank = []
+
+        #Already guessed words won't be picked again! (Unless the user resets the Word Bank)
+        for line in lines:
+            line = line.rstrip("\n")
+            if ";guessed" not in line:
+                word_bank.append(line)
+
+            if self.difficulty == "Challenge":
+                word_bank.append(line[:-8])
+           
+                    
 
         # So the "Challenge complete" line is not counted as a word
         del word_bank[len(word_bank) - 1]
-
-        #Already guesses words won't be picked again! (Unless the user resets the Word Bank)
-        for i in range(len(word_bank) - 1):
-            if ";guessed" in word_bank[i]:
-                if self.difficulty == "Challenge":
-                        word_bank[i] = word_bank[i][:-8]
-                else:
-                    word_bank.remove(word_bank[i])
 
         self.chosen_word = word_bank[random.randint(0, len(word_bank) - 1)].upper()
     
@@ -180,8 +241,93 @@ class Game:
                 self.chosen_word = self.challenge_words[0]
         print("The chosen word is -> {}\n".format(self.chosen_word))
         print("Challenge words -> {}".format(self.challenge_words))
-        self.game_screen_setup(chosen_difficulty, self.minutes_timer, self.seconds_timer)
+        self.classic_mode_screen_setup(chosen_difficulty, self.minutes_timer, self.seconds_timer)
 
+
+    def select_country(self):
+        """
+        Based on the continent chosen by the user, 
+        a random word is picked from that chosen continent
+        """
+
+        folder_name = "" # --> This variable will contain the folder's name depending on which continent the player chose!
+
+        base_dir = os.path.dirname(os.path.abspath(__file__)) # --> Absolute path for the script directory
+
+        if self.category == "Europe":
+            folder_name = "europe"
+            self.category_label_x_pos = 425
+            self.category_label_color = "#bcf6f0"
+
+        elif self.category == "America":
+            folder_name = "america"
+            self.category_label_x_pos = 410
+            self.category_label_color = "#f8cb76"
+
+        elif self.category == "Asia":
+            folder_name = "asia"
+            self.category_label_x_pos = 440
+            self.category_label_color = "#f77070"
+
+        elif self.category == "Africa":
+            folder_name = "africa"
+            self.category_label_x_pos = 430
+            self.category_label_color = "#a7f770"
+
+        elif self.category == "Oceania":
+            folder_name = "oceania"
+            self.category_label_x_pos = 420
+            self.category_label_color = "#70f7c4"
+
+        # --> Construct the full path to the wanted folder
+        self.folder_path = os.path.join(base_dir, "images", "flag_gamemode", "country_icons", folder_name)
+
+        # --> To position in the continent folder containing all flag images
+        os.chdir(self.folder_path)
+
+        # --> This array will contain all flag images
+        countries_image_list = os.listdir()
+        
+        # --> Add the file name for the chosen continent
+        self.file_path = os.path.join(base_dir, "Word Bank", "flag_gamemode", folder_name)
+        self.file_path = self.file_path + ".txt"
+
+        with open(self.file_path, "r", encoding = "utf-8") as f:
+            lines = f.readlines()
+
+
+        country_bank = []
+
+        #Already guessed words won't be picked again! (Unless the user resets the Word Bank)
+        for line in lines:
+            line = line.rstrip("\n")
+            if ";guessed" not in line:
+                country_bank.append(line)
+            else:
+                
+                line = line[:-8]
+                line = line.lower()
+                if line.find(" "):
+                    line = line.replace(" ", "-")
+                countries_image_list.remove(line + ".png")
+
+        if len(country_bank) == 0:
+            messagebox.showinfo("All words found!","All countries were found for {}!" .format(self.category))
+            from game_settings_screen import FlagModeSettings
+            os.chdir('..\\..')
+            os.chdir('..\\..')
+            FlagModeSettings(self.window)
+            return
+
+        random_index = random.randint(0, len(country_bank) - 1)
+        self.chosen_country = country_bank[random_index].upper()
+        self.chosen_country_flag = countries_image_list[random_index]
+
+        print("The chosen country is -> {}\n" .format(self.chosen_country))
+        print(self.chosen_country_flag)
+
+        self.flag_mode_screen_setup()
+            
 
     def render_new_input(self):
         """
@@ -191,7 +337,12 @@ class Game:
         
         self.calculate_center_frame()
 
-        for i, char in enumerate(self.chosen_word):
+        if self.gamemode == "Classic":
+            secret_word = self.chosen_word
+        else:
+            secret_word = self.chosen_country
+
+        for i, char in enumerate(secret_word):
             if char != " ":
                 new_entry = Entry(self.input_area, bg = "white", font =("Arial", 28), width=2)
                 new_entry.place(x = self.x_position, y = self.y_position)
@@ -314,7 +465,11 @@ class Game:
         This function center the "game_frame" Frame vertically 
         based on the length of the secret word
         """
-        word_length = len(self.chosen_word)
+        if self.gamemode == "Classic":
+            word_length = len(self.chosen_word)
+        else:
+            word_length = len(self.chosen_country)
+
         match word_length:
             case 2: self.x_position = 390
             case 3: self.x_position = 370
@@ -346,11 +501,16 @@ class Game:
         self.calculate_center_frame()
 
         new_guess = ""
-        #Sum all the letters wrote to form the guess word!
+
+        #Sum all the letters wrote to form the user's guess!
         for letter in self.entry_boxes:
             new_guess += letter.get()
-        
-        secret_word = self.chosen_word.replace(" ","") #Remove a space when there is one so the secret word's length isn't interfered by the space 
+
+        #Remove a space when there is one so the secret word's length isn't interfered by the space 
+        if self.gamemode == "Classic":
+            secret_word = self.chosen_word.replace(" ","") 
+        else:
+            secret_word = self.chosen_country.replace(" ","") 
 
         #Check if the nª of letters of the user's guess and the secret word are the same!
         if len(new_guess) == len(secret_word):
@@ -362,25 +522,46 @@ class Game:
             n_spaces = 0 #To increment with "i" if there is a space in the secret word
             #Check if the letter is in the word
             for i, letter in enumerate(new_guess):
-                if self.chosen_word[i] == " ":
-                    n_spaces += 1
+                if self.gamemode == "Classic":
+                    if self.chosen_word[i] == " ":
+                        n_spaces += 1
+                        self.x_position += 50
+                    if letter in self.chosen_word and letter != self.chosen_word[i + n_spaces]:
+                        #If the letter is correct and the position where that letter is supposed to be already has that letter
+                        for j in range (len(self.chosen_word)):
+                            if new_guess[j] == new_guess[i] and new_guess[j] == self.chosen_word[j + n_spaces]:
+                                self.render_result("lightgrey", letter)
+                                break
+                            if j == (len(self.chosen_word) - 1):
+                                #The letter is in the word, but in the wrong position
+                                self.render_result("yellow", letter)
+                    elif letter == self.chosen_word[i + n_spaces]:
+                        #The letter is in the word as well as in the correct position
+                        self.render_result("green", letter)
+                    else:
+                        #The letter isn't in the word
+                        self.render_result("lightgrey", letter)
                     self.x_position += 50
-                if letter in self.chosen_word and letter != self.chosen_word[i + n_spaces]:
-                    #If the letter is correct and the position where that letter is supposed to be already has that letter
-                    for j in range (len(self.chosen_word)):
-                        if new_guess[j] == new_guess[i] and new_guess[j] == self.chosen_word[j + n_spaces]:
-                            self.render_result("lightgrey", letter)
-                            break
-                        if j == (len(self.chosen_word) - 1):
-                            #The letter is in the word, but in the wrong position
-                            self.render_result("yellow", letter)
-                elif letter == self.chosen_word[i + n_spaces]:
-                    #The letter is in the word as well as in the correct position
-                    self.render_result("green", letter)
                 else:
-                    #The letter isn't in the word
-                    self.render_result("lightgrey", letter)
-                self.x_position += 50
+                    if self.chosen_country[i] == " ":
+                        n_spaces += 1
+                        self.x_position += 50
+                    if letter in self.chosen_country and letter != self.chosen_country[i + n_spaces]:
+                        #If the letter is correct and the position where that letter is supposed to be already has that letter
+                        for j in range (len(self.chosen_country)):
+                            if new_guess[j] == new_guess[i] and new_guess[j] == self.chosen_country[j + n_spaces]:
+                                self.render_result("lightgrey", letter)
+                                break
+                            if j == (len(self.chosen_country) - 1):
+                                #The letter is in the word, but in the wrong position
+                                self.render_result("yellow", letter)
+                    elif letter == self.chosen_country[i + n_spaces]:
+                        #The letter is in the word as well as in the correct position
+                        self.render_result("green", letter)
+                    else:
+                        #The letter isn't in the word
+                        self.render_result("lightgrey", letter)
+                    self.x_position += 50
 
             if new_guess == secret_word: 
                 if self.difficulty == "Challenge":
@@ -400,9 +581,14 @@ class Game:
                     self.render_new_input()
                 else:
                     messagebox.showinfo("CONGRATS!", "YOU GOT IT RIGHT!")
-                    self.update_word_bank()
-                    self.save_user_info()
-                    self.play_again()
+
+                    if self.gamemode == "Classic":
+                        self.update_word_bank()
+                        self.save_user_info()
+                        self.play_again()
+                    else:
+                        self.update_country_bank()
+                        self.play_again()
             else:
                 if self.tries > 1:
                     self.tries-=1
@@ -411,6 +597,7 @@ class Game:
                     self.render_new_input()
                 else: 
                     self.losing_popup()
+                    return
                     
         else:
             messagebox.showinfo("Info","You need to fill all blank spaces!")
@@ -443,7 +630,7 @@ class Game:
 
         word_bank = [line.rstrip("\n") for line in lines]
 
-        del word_bank[len(word_bank) - 1]
+        del word_bank[len(word_bank) - 1] #Delete the last line which is the "Challenge complete?" line
 
         #Iterate the word bank to update the secret word so it doesn't get chosen again
         for i in range(len(word_bank)):
@@ -460,7 +647,25 @@ class Game:
                 f.write("Challenge complete? No")
                 
 
-    
+    def update_country_bank(self):
+        with open(self.file_path, "r", encoding = "utf-8") as f:
+            lines = f.readlines()
+
+        country_bank = [line.rstrip("\n") for line in lines]
+
+        #Iterate the country bank to update it
+        for i in range(len(country_bank)):
+            if country_bank[i].upper() == self.chosen_country:
+                country_bank[i] += ";guessed"
+
+        with open(self.file_path, "w", encoding = "utf-8") as f:
+            for country in country_bank:
+                if country == country_bank[len(country_bank) - 1]:
+                    f.write(country)
+                else:
+                    f.write(country + "\n")
+                
+
     def save_user_info(self):
         """
         This function will update the user's info (what category & difficulty they chose, and nº of hints they have)
@@ -481,10 +686,14 @@ class Game:
             self.popup.destroy()
 
         self.game_frame.place_forget()
-
         self.save_user_info()
-        from game_settings_screen import ClassicModeSettings
-        ClassicModeSettings(self.window)
+
+        if self.gamemode == "Classic":
+            from game_settings_screen import ClassicModeSettings
+            ClassicModeSettings(self.window)
+        else:
+            from game_settings_screen import FlagModeSettings
+            FlagModeSettings(self.window)
 
 
     def play_again(self):
@@ -495,7 +704,7 @@ class Game:
             self.popup.destroy()
 
         self.game_frame.place_forget()
-        Game(self.window, self.difficulty, self.category)
+        Game(self.window, self.difficulty, self.category, self.gamemode)
     
 
     def losing_popup(self):
@@ -515,9 +724,6 @@ class Game:
 
         losing_message_lbl = Label(self.popup, text="You lost! :(", font = ("Arial", 18), bg="lightgrey")
         losing_message_lbl.place(x = 190, y = 20)
-
-        correct_answer_lbl = Label(self.popup, text="The correct answer was -> {}".format(self.chosen_word), font=("Arial", 14), bg="lightgrey")
-        correct_answer_lbl.place(x = 90, y = 80)
 
         go_back_btn = Button(self.popup, text = "Return to \n Title Screen!",width= 12, height=3, font=("Arial", 12), command=lambda:self.return_to_title_screen())
         go_back_btn.place(x = 100, y = 150)

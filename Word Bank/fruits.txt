@@ -4,7 +4,8 @@ Orange
 Mango
 Grape
 Pineapple
-StrawberryBlueberry
+Strawberry
+Blueberry
 Raspberry
 Blackberry
 Cherry

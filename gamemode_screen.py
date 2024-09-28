@@ -1,6 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from game_settings_screen import ClassicModeSettings
+from game_settings_screen import FlagModeSettings
 from PIL import Image, ImageTk
 import os
 
@@ -50,11 +51,8 @@ class GamemodeScreenApp:
         self.play_classic_mode = Button(self.classic_mode_frame, text="Play!", width=14, height=2, border=2, font=("Helvetica", 14), command=lambda:self.classic_mode())
         self.play_classic_mode.place(x = 150, y = 420)
 
-        self.play_flag_mode = Button(self.flag_mode_frame, text="Play!", width=14, height=2, border=2, font=("Helvetica", 14), state="disabled")
+        self.play_flag_mode = Button(self.flag_mode_frame, text="Play!", width=14, height=2, border=2, font=("Helvetica", 14), command=lambda: self.flag_mode())
         self.play_flag_mode.place(x = 150, y = 420)
-
-        self.coming_soon_lbl = Label(self.flag_mode_frame, bg="lightgrey", text="Coming Soon!", font=("Arial", 12, "italic"))
-        self.coming_soon_lbl.place(x = 180, y = 395)
 
 
     def classic_mode(self):
@@ -73,4 +71,7 @@ class GamemodeScreenApp:
         This function will remove all the Gamemode Screen's widgets
         and setup all widgets from the Flag Mode window!
         """
-        return
+        self.classic_mode_frame.place_forget()
+        self.flag_mode_frame.place_forget()
+
+        FlagModeSettings(self.window)

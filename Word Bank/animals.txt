@@ -9,7 +9,8 @@ Lion
 Eagle
 Tiger
 Shark
-DeerFox
+Deer
+Fox
 Squirrel
 Rabbit
 Flamingo

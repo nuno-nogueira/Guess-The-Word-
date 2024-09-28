@@ -4,6 +4,8 @@ from game import Game
 from PIL import Image, ImageTk
 import os
 
+
+#Classic Mode
 class ClassicModeSettings:
     def __init__(self, window):
         self.window = window
@@ -89,7 +91,7 @@ class ClassicModeSettings:
         self.tutorial_icon.image = open_new_icon
         self.tutorial_icon.place(x = 395, y = 5)
 
-        #--->Word Bank Progression Frame widgets
+        #--->Word Bank Progression Frame Widgets
         self.word_bank_frame_title = Label(self.word_bank_frame, text = "Word Bank Progression", font=("Arial", 22,"bold"), bg="lightgrey")
         self.word_bank_frame_title.place(x = 280, y = 10)
 
@@ -222,7 +224,8 @@ class ClassicModeSettings:
                 for i in range (len(words)):
                     if ";guessed" in words[i]:
                         words[i] = words[i][0:words[i].find(";")]
-                    elif words[i] == words[len(words) - 1]:
+                        words[i] = words[i] + "\n"
+                    if words[i] == words[len(words) - 1]:
                             change_files.append(words[i])
                     self.words_list.append(words[i])
 
@@ -246,7 +249,11 @@ class ClassicModeSettings:
                     f.write("Challenge complete? No")
                 word_bank.clear()
 
+            self.category_frame.place_forget()
+            self.difficulty_frame.place_forget()
             self.word_bank_frame.place_forget()
+            self.play_button.place_forget()
+            self.go_back_button.place_forget()
             self.word_bank_progression()
             self.setup_game_settings_screen()
             messagebox.showinfo("Word Bank Reset", "The Word Bank has been sucessfully reset!")
@@ -359,7 +366,7 @@ class ClassicModeSettings:
             self.word_bank_frame.place_forget()
             self.play_button.place_forget()
             self.go_back_button.place_forget()
-            Game(self.window, self.difficulty_selected, self.category_selected)
+            Game(self.window, self.difficulty_selected, self.category_selected, "Classic")
 
 
     def go_back(self):
@@ -372,6 +379,275 @@ class ClassicModeSettings:
         self.word_bank_frame.place_forget()
         self.play_button.place_forget()
         self.go_back_button.place_forget()
+
+        from gamemode_screen import GamemodeScreenApp
+        GamemodeScreenApp(self.window)
+
+
+
+#Flag Mode!
+class FlagModeSettings:
+    def __init__(self, window):
+        self.window = window
+
+
+        self.country_bank_progression()
+        self.setup_game_settings_screen()
+
+
+    def setup_game_settings_screen(self):
+        """
+        This function has all the game setting's widgets!
+        """
+        # ---> Frames
+        self.continents_frame = Frame(self.window, width= 950, height= 410, bg="lightgrey")
+        self.continents_frame.place(x = 25, y = 60)
+
+        self.country_bank_frame = Frame(self.window, width=950, height=250, bg="lightgrey")
+        self.country_bank_frame.place(x = 25, y = 520)
+
+        # ---> Go back button
+        icon_path = os.path.join("images","go_back_icon.png")
+        icon = Image.open(icon_path)
+        icon = icon.resize((44, 44))
+        open_new_icon = ImageTk.PhotoImage(icon)
+        self.go_back_button = Button(self.window, image=open_new_icon, bg="lightgrey", command = lambda: self.go_back())
+        self.go_back_button.image = open_new_icon
+        self.go_back_button.place(x = 920, y = 5)
+
+        # ---> Labels
+        self.choose_continent_lbl = Label(self.window, text = "Choose a continent!", bg="lightgrey", font=("Arial", 24, "bold"))
+        self.choose_continent_lbl.place(x = 370, y = 10)
+
+        self.word_bank_progression_lbl = Label(self.window, text = "Word Bank Progression", bg = "lightgrey", font=("Arial", 24, "bold"))
+        self.word_bank_progression_lbl.place(x = 335, y = 475)
+        # ---> Continent Frame Widgets
+
+        # ---> Continent Labels
+        self.europe_lbl = Label(self.continents_frame, text = "Europe", font = ("Arial", 18, "bold"), bg = "lightgrey")
+        self.america_lbl = Label(self.continents_frame, text = "America", font = ("Arial", 18, "bold"), bg = "lightgrey")
+        self.asia_lbl = Label(self.continents_frame, text = "Asia", font = ("Arial", 18, "bold"), bg = "lightgrey")
+        self.africa_lbl = Label(self.continents_frame, text = "Africa", font = ("Arial", 18, "bold"), bg = "lightgrey")
+        self.oceania_lbl = Label(self.continents_frame, text = "Oceania", font = ("Arial", 18, "bold"), bg = "lightgrey")
+        
+        self.europe_lbl.place(x = 90, y = 5)
+        self.america_lbl.place(x = 440, y = 5)
+        self.asia_lbl.place(x = 785, y = 5)
+        self.africa_lbl.place(x = 285, y = 195)
+        self.oceania_lbl.place(x = 600, y = 195)
+
+
+        # ---> Button Images
+        europe_icon_path = os.path.join("images", "flag_gamemode", "continent_icons", "europe_icon.png")
+        europe_icon = Image.open(europe_icon_path)
+        europe_icon = europe_icon.resize((150, 150))
+        open_europe_icon = ImageTk.PhotoImage(europe_icon)
+
+        america_icon_path = os.path.join("images", "flag_gamemode", "continent_icons", "america_icon.png")
+        america_icon = Image.open(america_icon_path)
+        america_icon = america_icon.resize((150, 150))
+        open_america_icon = ImageTk.PhotoImage(america_icon)
+
+        asia_icon_path = os.path.join("images", "flag_gamemode", "continent_icons", "asia_icon.png")
+        asia_icon = Image.open(asia_icon_path)
+        asia_icon = asia_icon.resize((150, 150))
+        open_asia_icon = ImageTk.PhotoImage(asia_icon)
+
+        africa_icon_path = os.path.join("images", "flag_gamemode", "continent_icons", "africa_icon.png")
+        africa_icon = Image.open(africa_icon_path)
+        africa_icon = africa_icon.resize((150, 150))
+        open_africa_icon = ImageTk.PhotoImage(africa_icon)
+
+        oceania_icon_path = os.path.join("images", "flag_gamemode", "continent_icons", "oceania_icon.png")
+        oceania_icon = Image.open(oceania_icon_path)
+        oceania_icon = oceania_icon.resize((150, 150))
+        open_oceania_icon = ImageTk.PhotoImage(oceania_icon)
+
+
+        # ---> Button Widgets
+        self.europe_button = Button(self.continents_frame, image=open_europe_icon, bg = "#bcf6f0", width = 175, height= 150, border = 2, command = lambda: self.start_game("Europe"))
+        self.america_button = Button(self.continents_frame, image=open_america_icon, bg = "#f8cb76", width = 175, height= 150, border = 2, command = lambda: self.start_game("America"))
+        self.asia_button = Button(self.continents_frame, image=open_asia_icon, bg = "#f77070", width = 175, height= 150, border = 2, command = lambda: self.start_game("Asia"))
+        self.africa_button = Button(self.continents_frame, image=open_africa_icon, bg = "#a7f770", width = 175, height= 150, border = 2, command = lambda: self.start_game("Africa"))
+        self.oceania_button = Button(self.continents_frame, image=open_oceania_icon, bg = "#70f7c4", width = 175, height= 150, border = 2, command = lambda: self.start_game("Oceania"))
+
+        self.europe_button.image = open_europe_icon
+        self.america_button.image = open_america_icon
+        self.asia_button.image = open_asia_icon
+        self.africa_button.image = open_africa_icon
+        self.oceania_button.image = open_oceania_icon
+
+        self.europe_button.place(x = 50, y = 40)
+        self.america_button.place(x = 400, y = 40)
+        self.asia_button.place(x = 720, y = 40)
+        self.africa_button.place(x = 230, y = 230)
+        self.oceania_button.place(x = 560, y = 230)
+
+
+        # ---> Word Bank Progression Frame Widgets
+        self.total_words_lbl = Label(self.country_bank_frame, text = "Total Countries found: {}/{}".format(self.total_countries_found, self.total_countries), font = ("Arial", 18, "bold"), bg = "lightgrey")
+        self.european_countries_lbl = Label(self.country_bank_frame, text = "European\n Countries found:\n{}/{}".format(self.european_countries_found, self.european_countries), font = ("Arial", 16), bg = "#bcf6f0")
+        self.american_countries_lbl = Label(self.country_bank_frame, text = "American\n Countries found:\n{}/{}".format(self.american_countries_found, self.american_countries), font = ("Arial", 16), bg = "#f8cb76")
+        self.asian_countries_lbl = Label(self.country_bank_frame, text = "Asian\n Countries found:\n{}/{}".format(self.asian_countries_found, self.asian_countries), font = ("Arial", 16), bg = "#f77070")
+        self.african_countries_lbl = Label(self.country_bank_frame, text = "African\n Countries found:\n{}/{}".format(self.african_countries_found, self.african_countries), font = ("Arial", 16), bg = "#a7f770")
+        self.oceanian_countries_lbl = Label(self.country_bank_frame, text = "Oceanian\n Countries found:\n{}/{}".format(self.oceanian_countries_found, self.oceanian_countries), font = ("Arial", 16), bg = "#70f7c4")
+        self.reset_word_bank_btn = Button(self.country_bank_frame, text="Reset Word Bank", font=("Arial", 14), border=2 , width=15, height=1, command=lambda: self.reset_country_bank())
+
+        self.total_words_lbl.place(x = 330, y = 10)
+        self.european_countries_lbl.place(x = 10, y = 70)
+        self.american_countries_lbl.place(x = 200, y = 70)
+        self.asian_countries_lbl.place(x = 390, y = 70)
+        self.african_countries_lbl.place(x = 580, y = 70)
+        self.oceanian_countries_lbl.place(x = 770, y = 70)
+        self.reset_word_bank_btn.place(x = 750, y = 10)
+
+
+
+    # --> Country Bank Functions
+    
+    def country_bank_progression(self):
+        """
+        This function has several functionalities which mostly tells the user their progression on the game
+        It mostly counts the total words the user found and how many words there are still to find for each
+        continent
+        """
+        self.countries_list = []
+        self.total_countries = 0
+        self.total_countries_found = 0
+        self.european_countries = 0
+        self.european_countries_found = 0
+        self.american_countries = 0
+        self.american_countries_found = 0
+        self.asian_countries = 0
+        self.asian_countries_found = 0
+        self.african_countries = 0
+        self.african_countries_found = 0
+        self.oceanian_countries = 0
+        self.oceanian_countries_found = 0
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        list_of_files = ["europe.txt","america.txt","asia.txt","africa.txt","oceania.txt"]
+
+        #--> Add all countries to the countries_list array
+        for file in list_of_files:
+            file_path = os.path.join(base_dir, "Word Bank", "flag_gamemode", file)
+
+            with open(file_path, "r", encoding = "utf-8") as f:
+                countries = f.readlines()
+
+            for country in countries:
+                self.total_countries += 1
+
+                if ";guessed" in country:
+                    self.total_countries_found += 1
+
+                if file == "europe.txt":
+                    self.european_countries += 1
+                    
+                    if ";guessed" in country:
+                        self.european_countries_found += 1
+                elif file == "america.txt":
+                    self.american_countries += 1
+
+                    if ";guessed" in country:
+                        self.american_countries_found += 1
+                elif file == "asia.txt":
+                    self.asian_countries += 1
+
+                    if ";guessed" in country:
+                        self.asian_countries_found += 1
+                elif file == "africa.txt":
+                    self.african_countries += 1
+
+                    if ";guessed" in country:
+                        self.african_countries_found += 1
+                elif file == "oceania.txt":
+                    self.oceanian_countries += 1
+
+                    if ";guessed" in country:
+                        self.oceanian_countries_found += 1
+
+    def reset_country_bank(self):
+        
+        answer = messagebox.askquestion("Reset Word Bank", 
+                               "Are you sure? If so, all the progression you've made will be reset and all the words you found can be selected again for you to guess!")
+
+        if answer == "yes":
+            self.countries_list = []
+
+            base_dir = os.path.dirname(os.path.abspath(__file__))
+            list_of_files = ["europe.txt","america.txt","asia.txt","africa.txt","oceania.txt"]
+            change_files = []
+
+            #--> Add all countries to the countries_list array
+            for file in list_of_files:
+                file_path = os.path.join(base_dir, "Word Bank", "flag_gamemode", file)
+
+                with open(file_path, "r", encoding = "utf-8") as f:
+                    countries = f.readlines()
+
+                for i in range (len(countries)):
+                    if ";guessed" in countries[i]:
+                        countries[i] = countries[i][0:countries[i].find(";")]
+                        if countries[i] != countries[len(countries) - 1]:
+                            countries[i] = countries[i] + "\n"
+                    if countries[i] == countries[len(countries) - 1]:
+                        change_files.append(countries[i])
+                    self.countries_list.append(countries[i])
+
+            country_bank = []
+
+            #Update the country bank
+            for file in list_of_files:
+                if file == list_of_files[0]:
+                    country_bank = self.countries_list[0:self.countries_list.index(change_files[0]) + 1]
+                elif file == list_of_files[1]:
+                    country_bank = self.countries_list[self.countries_list.index(change_files[0]) + 1: self.countries_list.index(change_files[1]) + 1]
+                elif file == list_of_files[2]:
+                    country_bank = self.countries_list[self.countries_list.index(change_files[1]) + 1: self.countries_list.index(change_files[2]) + 1]
+                elif file == list_of_files[3]:
+                    country_bank = self.countries_list[self.countries_list.index(change_files[2]) + 1: self.countries_list.index(change_files[3]) + 1]
+                elif file == list_of_files[4]:
+                    country_bank = self.countries_list[self.countries_list.index(change_files[3]) + 1: self.countries_list.index(change_files[4]) + 1]
+
+                file_path = os.path.join(base_dir, "Word Bank", "flag_gamemode", file)
+                with open(file_path, "w", encoding="utf-8") as f:
+                    for country in country_bank:
+                        f.write(country)
+                country_bank.clear()
+
+
+            self.continents_frame.place_forget()
+            self.country_bank_frame.place_forget()
+            self.go_back_button.place_forget()
+            self.choose_continent_lbl.place_forget()
+            self.word_bank_progression_lbl.place_forget()
+            self.country_bank_progression()
+            self.setup_game_settings_screen()
+            messagebox.showinfo("Word Bank Reset", "The Word Bank has been sucessfully reset!")
+        else:
+            return
+
+    #---> Other functions
+    def start_game(self, category):
+        self.continents_frame.place_forget()
+        self.country_bank_frame.place_forget()
+        self.go_back_button.place_forget()
+        self.choose_continent_lbl.place_forget()
+        self.word_bank_progression_lbl.place_forget()
+
+        Game(self.window, "", category, "Flag")
+
+    def go_back(self):
+        """
+        This function will make the user go back to the
+        gamemode selection screen!
+        """
+        self.continents_frame.place_forget()
+        self.country_bank_frame.place_forget()
+        self.go_back_button.place_forget()
+        self.choose_continent_lbl.place_forget()
+        self.word_bank_progression_lbl.place_forget()
 
         from gamemode_screen import GamemodeScreenApp
         GamemodeScreenApp(self.window)
