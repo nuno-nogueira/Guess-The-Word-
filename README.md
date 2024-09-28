@@ -7,24 +7,24 @@ This mini project is basically a Wordle clone. You have to guess a secret word b
 
 It has 2 gamemodes, Classic Mode and the Flag Mode
 ### Classic Mode
--> Comes with 4 categories: Jobs, Animals, Fruits and colors;
--> Available in 5 difficulties! (Easy, Medium, Hard, Challenge, and Random; _More details in the game_
+-> Comes with 4 categories: Jobs, Animals, Fruits and colors; <br>
+-> Available in 5 difficulties! (Easy, Medium, Hard, Challenge, and Random; _More details in the game_ <br>
 
 ### Flag Mode
--> Guess the country by its flag;
--> most countries from all inhabited continents are available! 
+-> Guess the country by its flag; <br>
+-> most countries from all inhabited continents are available! <br>
 
 ### Word Bank
--> Once you discover a word, it won't be picked again;
--> Available for both gamemodes;
--> Tracks your progression among all categories & difficulties;
--> You have the ability to reset it and start all over again!
+-> Once you discover a word, it won't be picked again; <br>
+-> Available for both gamemodes; <br>
+-> Tracks your progression among all categories & difficulties; <br>
+-> You have the ability to reset it and start all over again! <br>
 
 ## How to install "Guess the Word"?
 Simply download the zip and unzip it! No usernames or passwords required
 
 ## How to run "Guess the Word"?
-Run the main.py file in your IDE, make sure to have the PIL (Python Imaging Library) installed! 
+Run the main.py file in your IDE, make sure to have the PIL (Python Imaging Library) installed! <br>
 If you don't have PIL installed, here's the all information about how to install it: https://pypi.org/project/pillow/
 
 ## How to play?
