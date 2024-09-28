@@ -3,6 +3,23 @@
 ## Project Description
 This mini project is basically a Wordle clone. You have to guess a secret word based on coloured tiles indicating when letters match or occupy the correct position! (_More information on the "How to Play?" button in the Main Screen!_)
 
+### Functionalities
+
+It has 2 gamemodes, Classic Mode and the Flag Mode
+### Classic Mode
+-> Comes with 4 categories: Jobs, Animals, Fruits and colors;
+-> Available in 5 difficulties! (Easy, Medium, Hard, Challenge, and Random; _More details in the game_
+
+### Flag Mode
+-> Guess the country by its flag;
+-> most countries from all inhabited continents are available! 
+
+### Word Bank
+-> Once you discover a word, it won't be picked again;
+-> Available for both gamemodes;
+-> Tracks your progression among all categories & difficulties;
+-> You have the ability to reset it and start all over again!
+
 ## How to install "Guess the Word"?
 Simply download the zip and unzip it! No usernames or passwords required
 
